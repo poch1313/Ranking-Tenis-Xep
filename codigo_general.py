@@ -13,7 +13,7 @@ def authenticate_gsheet(sheet_name):
 
 # Initialize default data for Rankings and Match History
 def initialize_data(sheet):
-    players = ["Marinkovic", "Joseto", "Hernan", "Pavez", "Bozzo", "Bishara", "Hederra", "Poch", "Juande", "Hans"]
+    players = ["Marinkovic", "Joseto", "Hernan", "Pavez", "Bozzo", "Hederra", "Poch", "Juande"]
     points = [1000 for _ in players]
 
     # Initialize Rankings
@@ -63,7 +63,7 @@ def save_data(sheet, rankings, match_history):
     match_history_sheet.update([match_history.columns.values.tolist()] + match_history.values.tolist())
 
 # Connect to Google Sheets
-sheet_name = "Tennis Rankings and Match History"  # Replace with the name of your Google Sheet
+sheet_name = "Tennis Rankings and Match History Xep"  # Replace with the name of your Google Sheet
 sheet = authenticate_gsheet(sheet_name)
 
 # Initialize data if sheets are empty
