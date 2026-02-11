@@ -3,6 +3,13 @@ import streamlit as st
 from datetime import datetime
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+
+
+
 
 # Authenticate and connect to Google Sheets
 def authenticate_gsheet(sheet_name):
@@ -79,6 +86,17 @@ if "rankings" not in st.session_state:
 if "match_history" not in st.session_state:
     st.session_state.match_history = match_history
 
+players_emails = {
+    "Marinkovic": "nimarinkovic@uc.cl",
+    "Joseto": "jtvergara1@uc.cl",
+    "Hernan": "hfyanez@uc.cl,
+    "Pavez": "Srpavez@uc.cl",
+    "Bozzo": "aabozzo@uc.cl",
+    "Hederra": "nahederra@uc.cl",
+    "Poch": "poch_javier@hotmail.com",
+    "Juande": "jepenaylillo@uc.cl",
+}
+
 # Function to record a match and update rankings
 def record_match(winner, loser, base_points=50, upset_multiplier=1.5):
     rankings = st.session_state.rankings
@@ -116,11 +134,45 @@ def record_match(winner, loser, base_points=50, upset_multiplier=1.5):
 
     # Save updated data to Google Sheets
     save_data(sheet, st.session_state.rankings, st.session_state.match_history)
+def send_invitation_email(match_date, match_time, location, created_by):
+    sender = st.secrets["email"]["sender"]
+    password = st.secrets["email"]["password"]
+
+    recipient_list = list(players_emails.values())
+
+    subject = "🎾 Open Tennis Match Invitation"
+
+    body = f"""
+🎾 OPEN MATCH INVITATION
+
+{created_by} is looking for a match.
+
+📅 Date: {match_date}
+⏰ Time: {match_time}
+📍 Location: {location}
+
+Open the Ranking App to accept this invitation.
+
+First come, first served.
+"""
+
+    msg = MIMEMultipart()
+    msg["From"] = sender
+    msg["To"] = sender
+    msg["Subject"] = subject
+    msg["Bcc"] = ", ".join(recipient_list)
+
+    msg.attach(MIMEText(body, "plain"))
+
+    with smtplib.SMTP("smtp.gmail.com", 587) as server:
+        server.starttls()
+        server.login(sender, password)
+        server.send_message(msg)
 
 # Streamlit App
 st.title("🎾 Ranking Shishi de Tenis")
 
-menu = st.sidebar.selectbox("Menu", ["Ver Ranking", "Ver Historial de Partidos", "Anotar Resultado"])
+menu = st.sidebar.selectbox("Menu", ["Ver Ranking", "Ver Historial de Partidos", "Anotar Resultado","Invitación Abierta"])
 
 if menu == "Ver Ranking":
     st.header("📊 Ranking Actual")
@@ -154,3 +206,20 @@ elif menu == "Anotar Resultado":
                 updated_rankings = st.session_state.rankings.copy()
                 updated_rankings.insert(0, "Rank", range(1, len(updated_rankings) + 1))
                 st.dataframe(updated_rankings.set_index("Rank"))  # Use Rank as the index to remove the unnamed index column
+
+elif menu == "Invitación Abierta":
+    st.header("📣 Crear Invitación Abierta")
+
+    with st.form("invitation_form"):
+        created_by = st.selectbox("Soy:", list(players_emails.keys()))
+        match_date = st.date_input("Fecha")
+        match_time = st.time_input("Hora")
+        location = st.text_input("Lugar")
+        submit = st.form_submit_button("Enviar Invitación")
+
+        if submit:
+            try:
+                send_invitation_email(match_date, match_time, location, created_by)
+                st.success("Invitación enviada a todos los jugadores.")
+            except Exception as e:
+                st.error(f"Error enviando email: {e}")
