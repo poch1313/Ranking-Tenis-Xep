@@ -152,7 +152,9 @@ def record_match(winner, loser, base_points=50, upset_multiplier=1.5):
     st.session_state.match_history = pd.concat([match_history, pd.DataFrame([new_match])], ignore_index=True)
 
     # Save updated data to Google Sheets
-    save_data(sheet, st.session_state.rankings, st.session_state.match_history)
+    save_data(sheet,st.session_state.rankings,st.session_state.match_history,st.session_state.invitations)
+
+
 def send_invitation_email(match_date, match_time, location, created_by):
     sender = st.secrets["email"]["sender"]
     password = st.secrets["email"]["password"]
@@ -271,7 +273,7 @@ elif menu == "Invitación Abierta":
         location = st.text_input("Lugar")
         submit = st.form_submit_button("Enviar Invitación")
 
-           if submit:
+        if submit:
             try:
                 create_invitation(created_by, match_date, match_time, location)
                 send_invitation_email(match_date, match_time, location, created_by)
