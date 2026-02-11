@@ -269,10 +269,11 @@ elif menu == "Anotar Resultado":
 elif menu == "Invitación Abierta":
     st.header("📣 Crear Invitación Abierta")
 
+    # ---- CREATE INVITATION FORM ----
     with st.form("invitation_form"):
         created_by = st.selectbox("Soy:", list(players_emails.keys()))
         match_date = st.date_input("Fecha")
-        match_time= st.text_input("Hora",placeholder="Ejemplo: 19:30").strip()
+        match_time = st.text_input("Hora", placeholder="Ejemplo: 19:30").strip()
         location = st.text_input("Lugar")
         submit = st.form_submit_button("Enviar Invitación")
 
@@ -281,5 +282,48 @@ elif menu == "Invitación Abierta":
                 create_invitation(created_by, match_date, match_time, location)
                 send_invitation_email(match_date, match_time, location, created_by)
                 st.success("Invitación enviada y guardada correctamente.")
+                st.rerun()
             except Exception as e:
                 st.error(f"Error: {e}")
+
+    # ---- SHOW OPEN INVITATIONS ----
+    st.subheader("📬 Invitaciones Abiertas")
+
+    open_invites = st.session_state.invitations[
+        st.session_state.invitations["Status"] == "Open"
+    ]
+
+    if open_invites.empty:
+        st.info("No hay invitaciones abiertas.")
+    else:
+        for index, row in open_invites.iterrows():
+
+            st.markdown(f"""
+            ### 🎾 Invitación #{row['ID']}
+            - **Creado por:** {row['Created By']}
+            - **Fecha:** {row['Match Date']}
+            - **Hora:** {row['Match Time']}
+            - **Lugar:** {row['Location']}
+            """)
+
+            claimer = st.selectbox(
+                "Quién acepta esta invitación?",
+                list(players_emails.keys()),
+                key=f"claimer_{row['ID']}"
+            )
+
+            if st.button("Aceptar Invitación", key=f"accept_{row['ID']}"):
+
+                st.session_state.invitations.loc[index, "Status"] = "Claimed"
+                st.session_state.invitations.loc[index, "Claimed By"] = claimer
+
+                save_data(
+                    sheet,
+                    st.session_state.rankings,
+                    st.session_state.match_history,
+                    st.session_state.invitations
+                )
+
+                st.success(f"{claimer} aceptó la invitación.")
+                st.rerun()
+            
