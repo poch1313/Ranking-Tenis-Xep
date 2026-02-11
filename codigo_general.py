@@ -54,20 +54,38 @@ def load_data(sheet):
     match_history_data = match_history_sheet.get_all_records()
     match_history = pd.DataFrame(match_history_data)
 
-    return rankings, match_history
+    #Load Invitations
+    invitations_sheet = sheet.worksheet("Invitations")
+    invitations_data = invitations_sheet.get_all_records()
+    invitations = pd.DataFrame(invitations_data)
+
+    return rankings, match_history, invitations
 
 # Save data to Google Sheets
-def save_data(sheet, rankings, match_history):
+def save_data(sheet, rankings, match_history, invitations):
     rankings_sheet = sheet.worksheet("Rankings")
     match_history_sheet = sheet.worksheet("Match History")
+    invitations_sheet = sheet.worksheet("Invitations")
 
     # Save Rankings
     rankings_sheet.clear()
-    rankings_sheet.update([rankings.columns.values.tolist()] + rankings.values.tolist())
+    rankings_sheet.update(
+        [rankings.columns.values.tolist()] + rankings.values.tolist()
+    )
 
     # Save Match History
     match_history_sheet.clear()
-    match_history_sheet.update([match_history.columns.values.tolist()] + match_history.values.tolist())
+    match_history_sheet.update(
+        [match_history.columns.values.tolist()] + match_history.values.tolist()
+    )
+
+    # Save Invitations
+    invitations_sheet.clear()
+    invitations_sheet.update(
+        [invitations.columns.values.tolist()] + invitations.values.tolist()
+    )
+
+
 
 # Connect to Google Sheets
 sheet_name = "Tennis Rankings and Match History Xep"  # Replace with the name of your Google Sheet
@@ -77,14 +95,15 @@ sheet = authenticate_gsheet(sheet_name)
 initialize_data(sheet)
 
 # Load data from Google Sheets
-rankings, match_history = load_data(sheet)
+rankings, match_history, invitations = load_data(sheet)
 
 # Initialize session state with data from Google Sheets
 if "rankings" not in st.session_state:
-    st.session_state.rankings = rankings
+    rankings, match_history, invitations = load_data(sheet)
 
-if "match_history" not in st.session_state:
+    st.session_state.rankings = rankings
     st.session_state.match_history = match_history
+    st.session_state.invitations = invitations
 
 players_emails = {
     "Marinkovic": "nimarinkovic@uc.cl1",
@@ -169,6 +188,41 @@ First come, first served.
         server.login(sender, password)
         server.send_message(msg)
 
+
+def create_invitation(created_by, match_date, match_time, location):
+
+    invitations = st.session_state.invitations
+
+    new_id = 1 if invitations.empty else invitations["ID"].max() + 1
+
+    new_invite = {
+        "ID": new_id,
+        "Created By": created_by,
+        "Created At": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "Match Date": str(match_date),
+        "Match Time": match_time,
+        "Location": location,
+        "Status": "Open",
+        "Claimed By": ""
+    }
+
+    st.session_state.invitations = pd.concat(
+        [invitations, pd.DataFrame([new_invite])],
+        ignore_index=True
+    )
+
+    save_data(
+        sheet,
+        st.session_state.rankings,
+        st.session_state.match_history,
+        st.session_state.invitations
+    )
+
+
+
+
+
+
 # Streamlit App
 st.title("🎾 Ranking Shishi de Tenis")
 
@@ -217,9 +271,10 @@ elif menu == "Invitación Abierta":
         location = st.text_input("Lugar")
         submit = st.form_submit_button("Enviar Invitación")
 
-        if submit:
+           if submit:
             try:
+                create_invitation(created_by, match_date, match_time, location)
                 send_invitation_email(match_date, match_time, location, created_by)
-                st.success("Invitación enviada a todos los jugadores.")
+                st.success("Invitación enviada y guardada correctamente.")
             except Exception as e:
-                st.error(f"Error enviando email: {e}")
+                st.error(f"Error: {e}")
