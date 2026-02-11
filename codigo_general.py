@@ -87,14 +87,14 @@ if "match_history" not in st.session_state:
     st.session_state.match_history = match_history
 
 players_emails = {
-    "Marinkovic": "nimarinkovic@uc.cl",
-    "Joseto": "jtvergara1@uc.cl",
-    "Hernan": "hfyanez@uc.cl",
-    "Pavez": "Srpavez@uc.cl",
-    "Bozzo": "aabozzo@uc.cl",
-    "Hederra": "nahederra@uc.cl",
+    "Marinkovic": "nimarinkovic@uc.cl1",
+    "Joseto": "jtvergara1@uc.cl1",
+    "Hernan": "hfyanez@uc.cl1",
+    "Pavez": "Srpavez@uc.cl1",
+    "Bozzo": "aabozzo@uc.cl1",
+    "Hederra": "nahederra@uc.cl1",
     "Poch": "poch_javier@hotmail.com",
-    "Juande": "jepenaylillo@uc.cl",
+    "Juande": "jepenaylillo@uc.cl1",
 }
 
 # Function to record a match and update rankings
