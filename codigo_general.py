@@ -102,14 +102,19 @@ def format_score(row):
     score_parts = []
 
     for i in range(1, 6):
-        winner_col = f"Set{i}_Winner"
-        loser_col = f"Set{i}_Loser"
+        winner_col = f"W_Set{i}"
+        loser_col = f"L_Set{i}"
 
         if winner_col in row and loser_col in row:
             w = row[winner_col]
             l = row[loser_col]
 
-            if pd.notna(w) and pd.notna(l) and w != "" and l != "":
+            # Only include sets that were actually played
+            if (
+                pd.notna(w) and pd.notna(l) and
+                w != "" and l != "" and
+                (int(w) > 0 or int(l) > 0)
+            ):
                 score_parts.append(f"{int(w)}-{int(l)}")
 
     return " ".join(score_parts)
