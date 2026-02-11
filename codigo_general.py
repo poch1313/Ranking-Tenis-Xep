@@ -89,7 +89,7 @@ if "match_history" not in st.session_state:
 players_emails = {
     "Marinkovic": "nimarinkovic@uc.cl",
     "Joseto": "jtvergara1@uc.cl",
-    "Hernan": "hfyanez@uc.cl,
+    "Hernan": "hfyanez@uc.cl",
     "Pavez": "Srpavez@uc.cl",
     "Bozzo": "aabozzo@uc.cl",
     "Hederra": "nahederra@uc.cl",
