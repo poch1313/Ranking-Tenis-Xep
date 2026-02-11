@@ -213,7 +213,7 @@ elif menu == "Invitación Abierta":
     with st.form("invitation_form"):
         created_by = st.selectbox("Soy:", list(players_emails.keys()))
         match_date = st.date_input("Fecha")
-        match_time_str = st.text_input("Hora (HH:MM) ",placeholder="Ejemplo: 19:30").strip()
+        match_time_str = st.text_input("Hora",placeholder="Ejemplo: 19:30").strip()
         location = st.text_input("Lugar")
         submit = st.form_submit_button("Enviar Invitación")
 
