@@ -98,6 +98,21 @@ def save_data(sheet, rankings, match_history, invitations):
         clean_invitations.values.tolist()
     )
 
+def format_score(row):
+    score_parts = []
+
+    for i in range(1, 6):
+        winner_col = f"Set{i}_Winner"
+        loser_col = f"Set{i}_Loser"
+
+        if winner_col in row and loser_col in row:
+            w = row[winner_col]
+            l = row[loser_col]
+
+            if pd.notna(w) and pd.notna(l) and w != "" and l != "":
+                score_parts.append(f"{int(w)}-{int(l)}")
+
+    return " ".join(score_parts)
 
 # Connect to Google Sheets
 sheet_name = "Tennis Rankings and Match History Xep"
@@ -255,10 +270,32 @@ if menu == "Ver Ranking":
 
 elif menu == "Ver Historial de Partidos":
     st.header("📜 Historial de Partidos")
+
     if st.session_state.match_history.empty:
         st.write("No matches have been recorded yet.")
+
     else:
-        st.table(st.session_state.match_history)
+        display_history = st.session_state.match_history.copy()
+
+        # Create clean tennis-style score column
+        display_history["Score"] = display_history.apply(format_score, axis=1)
+
+        # Columns we want to display
+        columns_to_show = [
+            "Date",
+            "Winner",
+            "Loser",
+            "Score",
+            "Points Exchanged"
+        ]
+
+        # Keep only columns that exist (prevents errors on older matches)
+        columns_to_show = [
+            col for col in columns_to_show
+            if col in display_history.columns
+        ]
+
+        st.table(display_history[columns_to_show])
 
 elif menu == "Anotar Resultado":
     st.header("🏅 Anotar Resultado")
