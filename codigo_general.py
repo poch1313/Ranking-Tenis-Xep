@@ -210,6 +210,8 @@ def send_invitation_email(match_date, match_time, location, created_by):
 
 Open the Ranking App to accept this invitation.
 
+https://ranking-tenis-xep.streamlit.app/
+
 First come, first served.
 """
 
