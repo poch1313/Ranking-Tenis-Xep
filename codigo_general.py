@@ -88,22 +88,25 @@ def save_data(sheet, rankings, match_history, invitations):
 
 
 # Connect to Google Sheets
-sheet_name = "Tennis Rankings and Match History Xep"  # Replace with the name of your Google Sheet
+sheet_name = "Tennis Rankings and Match History Xep"
 sheet = authenticate_gsheet(sheet_name)
 
 # Initialize data if sheets are empty
 initialize_data(sheet)
 
-# Load data from Google Sheets
+# Load data once
 rankings, match_history, invitations = load_data(sheet)
 
-# Initialize session state with data from Google Sheets
+# Initialize session state independently
 if "rankings" not in st.session_state:
-    rankings, match_history, invitations = load_data(sheet)
-
     st.session_state.rankings = rankings
+
+if "match_history" not in st.session_state:
     st.session_state.match_history = match_history
+
+if "invitations" not in st.session_state:
     st.session_state.invitations = invitations
+   
 
 players_emails = {
     "Marinkovic": "nimarinkovic@uc.cl1",
