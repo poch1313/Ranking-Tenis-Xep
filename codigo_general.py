@@ -63,28 +63,40 @@ def load_data(sheet):
 
 # Save data to Google Sheets
 def save_data(sheet, rankings, match_history, invitations):
+
     rankings_sheet = sheet.worksheet("Rankings")
     match_history_sheet = sheet.worksheet("Match History")
     invitations_sheet = sheet.worksheet("Invitations")
 
+    def clean_df(df):
+        # Replace NaN with empty string
+        df = df.fillna("")
+        # Convert everything to native Python types
+        return df.astype(object)
+
     # Save Rankings
     rankings_sheet.clear()
+    clean_rankings = clean_df(rankings)
     rankings_sheet.update(
-        [rankings.columns.values.tolist()] + rankings.values.tolist()
+        [clean_rankings.columns.values.tolist()] +
+        clean_rankings.values.tolist()
     )
 
     # Save Match History
     match_history_sheet.clear()
+    clean_history = clean_df(match_history)
     match_history_sheet.update(
-        [match_history.columns.values.tolist()] + match_history.values.tolist()
+        [clean_history.columns.values.tolist()] +
+        clean_history.values.tolist()
     )
 
     # Save Invitations
     invitations_sheet.clear()
+    clean_invitations = clean_df(invitations)
     invitations_sheet.update(
-        [invitations.columns.values.tolist()] + invitations.values.tolist()
+        [clean_invitations.columns.values.tolist()] +
+        clean_invitations.values.tolist()
     )
-
 
 
 # Connect to Google Sheets
