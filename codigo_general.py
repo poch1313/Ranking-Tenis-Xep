@@ -148,7 +148,7 @@ players_emails = {
     "Bozzo": "aabozzo@uc.cl1",
     "Hederra": "nahederra@uc.cl1",
     "Poch": "poch_javier@hotmail.com",
-    "Juande": "jepenaylillo@uc.cl1",
+    "Juande": "fernandadelpozodl@gmail.com",
 }
 
 # Function to record a match and update rankings
