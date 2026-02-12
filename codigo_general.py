@@ -260,7 +260,41 @@ def create_invitation(created_by, match_date, match_time, location):
 
 
 
+def send_invitation_claimed_email(invite_row, claimer):
 
+    sender = st.secrets["email"]["sender"]
+    password = st.secrets["email"]["password"]
+
+    recipient_list = list(players_emails.values())
+
+    subject = "🎾 Match Confirmed – Invitation Closed"
+
+    body = f"""
+🎾 MATCH CONFIRMED
+
+The open invitation has been accepted.
+
+👤 {invite_row['Created By']} will play against {claimer}
+
+📅 Date: {invite_row['Match Date']}
+⏰ Time: {invite_row['Match Time']}
+📍 Location: {invite_row['Location']}
+
+The invitation is now closed.
+"""
+
+    msg = MIMEMultipart()
+    msg["From"] = sender
+    msg["To"] = sender
+    msg["Subject"] = subject
+    msg["Bcc"] = ", ".join(recipient_list)
+
+    msg.attach(MIMEText(body, "plain"))
+
+    with smtplib.SMTP("smtp.gmail.com", 587) as server:
+        server.starttls()
+        server.login(sender, password)
+        server.send_message(msg)
 
 
 # Streamlit App
@@ -420,9 +454,11 @@ elif menu == "Invitación Abierta":
 
             if st.button("Aceptar Invitación", key=f"accept_{row['ID']}"):
 
+                # 1️⃣ Update status
                 st.session_state.invitations.loc[index, "Status"] = "Claimed"
                 st.session_state.invitations.loc[index, "Claimed By"] = claimer
 
+                # 2️⃣ Save to Google Sheets
                 save_data(
                     sheet,
                     st.session_state.rankings,
@@ -430,6 +466,10 @@ elif menu == "Invitación Abierta":
                     st.session_state.invitations
                 )
 
+                # 3️⃣ Send confirmation email (NEW)
+                send_invitation_claimed_email(row, claimer)
+
+                # 4️⃣ Feedback + refresh
                 st.success(f"{claimer} aceptó la invitación.")
                 st.rerun()
             
